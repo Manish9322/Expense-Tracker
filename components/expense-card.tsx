@@ -61,7 +61,7 @@ export function ExpenseCard({
           : 'bg-card border-border hover:border-primary/20',
         isHovered && 'shadow-md'
       )}
-      onClick={() => onToggleCheck(expense.id, !expense.isChecked)}
+      onClick={() => handleCheckToggle(expense.id, !expense.isChecked)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
