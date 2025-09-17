@@ -4,13 +4,5 @@
       "path": "/api/daily-log",
       "schedule": "0 0 * * *"
     }
-  ],
-  "env": {
-    "MONGODB_URL": "@mongodb-url"
-  },
-  "build": {
-    "env": {
-      "MONGODB_URL": "@mongodb-url"
-    }
-  }
+  ]
 }
