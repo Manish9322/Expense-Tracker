@@ -6,8 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { ExpenseLog, Expense } from '@/types';
-import { shortDate, formatDate } from '@/lib/utils';
+import { Expense } from '@/types';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
