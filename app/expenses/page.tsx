@@ -8,14 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ExpenseLog, Expense } from '@/types';
 import { shortDate, formatDate } from '@/lib/utils';
-import { CalendarIcon, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Select,
   SelectContent,
@@ -29,7 +23,6 @@ import { useGetExpensesQuery, useAddDailyExpenseLogMutation, useAddCleanupDailyM
 export default function DailyExpensesPage() {
   const [currentExpenses, setCurrentExpenses] = useState<Expense[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedCategory, setSelectedCategory] = useState<string>('all-categories');
   const [minAmount, setMinAmount] = useState('');
   const [maxAmount, setMaxAmount] = useState('');
@@ -112,20 +105,20 @@ export default function DailyExpensesPage() {
     checkMidnight();
   }, [currentExpenses]);
 
-  // Load expenses from the database and filter for today
+  // Load expenses from the database - show all checked expenses regardless of creation date
   useEffect(() => {
     if (expenses) {
-      const today = new Date().toISOString().split('T')[0];
-      const todayExpenses = expenses.filter(
-        (expense: Expense) => new Date(expense.createdAt).toISOString().split('T')[0] === today
-      );
-      setCurrentExpenses(todayExpenses);
+      // Map the expenses to ensure they have the correct structure
+      const mappedExpenses = expenses.map((expense: any) => ({
+        ...expense,
+        id: expense._id,
+      }));
+      setCurrentExpenses(mappedExpenses);
     }
   }, [expenses]);
 
   const clearFilters = () => {
     setSearchTerm('');
-    setDate(new Date());
     setSelectedCategory('all-categories');
     setMinAmount('');
     setMaxAmount('');
@@ -140,14 +133,14 @@ export default function DailyExpensesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Daily Expense Log</h1>
-        <p className="text-muted-foreground">Track today's expenses (saved at midnight)</p>
+        <h1 className="text-3xl font-bold tracking-tight">Selected Expenses</h1>
+        <p className="text-muted-foreground">View all currently selected (checked) expenses</p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Filters</CardTitle>
-          <CardDescription>Refine today's expenses</CardDescription>
+          <CardDescription>Refine selected expenses</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -160,27 +153,6 @@ export default function DailyExpensesPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full"
               />
-            </div>
-
-            <div className="w-full sm:w-auto">
-              <Label>Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full gap-2">
-                    <CalendarIcon className="h-4 w-4" />
-                    {date ? shortDate(date) : "Today"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                    disabled={(date) => date > new Date() || date < new Date()}
-                  />
-                </PopoverContent>
-              </Popover>
             </div>
           </div>
 
@@ -245,7 +217,7 @@ export default function DailyExpensesPage() {
           <Card>
             <CardHeader className="pb-4">
               <div className="flex justify-between items-center">
-                <CardTitle>{formatDate(new Date())}</CardTitle>
+                <CardTitle>Selected Expenses</CardTitle>
                 <Badge variant="outline" className="font-mono">
                   {formatCurrency(totalAmount, currentUser.preferences.currency)}
                 </Badge>
@@ -289,9 +261,9 @@ export default function DailyExpensesPage() {
           </Card>
         ) : (
           <div className="text-center p-8">
-            <h3 className="text-lg font-medium">No expenses for today</h3>
+            <h3 className="text-lg font-medium">No selected expenses</h3>
             <p className="text-muted-foreground">
-              {hasActiveFilters ? "Try adjusting your filters" : "Start tracking today's expenses"}
+              {hasActiveFilters ? "Try adjusting your filters" : "Go to the dashboard and select (check) some expenses to see them here"}
             </p>
           </div>
         )}

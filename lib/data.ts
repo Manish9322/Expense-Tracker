@@ -4,6 +4,7 @@ import { Expense, ExpenseLog, User } from '@/types';
 export const initialExpenses: Expense[] = [
   {
     id: '1',
+    _id: '1',
     title: 'Coffee',
     amount: 5.5,
     autoAdd: true,
@@ -13,6 +14,7 @@ export const initialExpenses: Expense[] = [
   },
   {
     id: '2',
+    _id: '2',
     title: 'Lunch',
     amount: 12.75,
     autoAdd: false,
@@ -22,6 +24,7 @@ export const initialExpenses: Expense[] = [
   },
   {
     id: '3',
+    _id: '3',
     title: 'Transport',
     amount: 2.5,
     autoAdd: true,
@@ -31,6 +34,7 @@ export const initialExpenses: Expense[] = [
   },
   {
     id: '4',
+    _id: '4',
     title: 'Gym Membership',
     amount: 25,
     autoAdd: true,
@@ -40,6 +44,7 @@ export const initialExpenses: Expense[] = [
   },
   {
     id: '5',
+    _id: '5',
     title: 'Movie Tickets',
     amount: 15,
     autoAdd: false,

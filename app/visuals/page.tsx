@@ -295,7 +295,7 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? typeof value === 'number' ? value.toFixed(2) : value : value}`, 'Amount']} />
                       <Legend />
                       <Line 
                         type="monotone" 
@@ -330,7 +330,7 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? typeof value === 'number' ? value.toFixed(2) : value : value}`, 'Amount']} />
                       <Bar dataKey="amount" fill="hsl(var(--chart-3))" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -350,7 +350,7 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="hour" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']} />
                       <Area 
                         type="monotone" 
                         dataKey="amount" 
@@ -376,7 +376,7 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']} />
                       <Legend />
                       <Bar dataKey="amount" fill="hsl(var(--chart-1))" name="Actual" />
                       <Line 
@@ -420,7 +420,7 @@ export default function VisualsPage() {
                         ))}
                       </Pie>
                       <Tooltip 
-                        formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']}
+                        formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']}
                       />
                       <Legend />
                     </PieChart>
@@ -441,7 +441,7 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']} />
                       <Bar dataKey="value" fill="hsl(var(--chart-1))" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -461,7 +461,7 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="category" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']} />
                       <Legend />
                       <Bar dataKey="budget" fill="hsl(var(--chart-2))" name="Budget" />
                       <Bar dataKey="actual" fill="hsl(var(--chart-1))" name="Actual" />
@@ -481,10 +481,8 @@ export default function VisualsPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <RadialBarChart cx="50%" cy="50%" innerRadius="10%" outerRadius="80%" data={frequencyData}>
                       <RadialBar 
-                        minAngle={15} 
                         label={{ position: 'insideStart', fill: '#fff' }} 
                         background 
-                        clockWise 
                         dataKey="frequency" 
                         fill="hsl(var(--chart-3))"
                       />
@@ -512,7 +510,7 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']} />
                       <Legend />
                       <Line type="monotone" dataKey="Food" stroke={COLORS[0]} strokeWidth={2} />
                       <Line type="monotone" dataKey="Transport" stroke={COLORS[1]} strokeWidth={2} />
@@ -538,7 +536,7 @@ export default function VisualsPage() {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
-                        <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                        <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']} />
                         <Area 
                           type="monotone" 
                           dataKey="amount" 
@@ -564,7 +562,7 @@ export default function VisualsPage() {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="month" />
                         <YAxis />
-                        <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                        <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']} />
                         <Legend />
                         <Bar dataKey="saved" fill="hsl(var(--chart-2))" name="Saved" />
                         <Line 
@@ -597,7 +595,7 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']} />
                       <Bar dataKey="amount" fill="hsl(var(--chart-4))" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -617,7 +615,7 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']} />
                       <Legend />
                       <Line 
                         type="monotone" 
@@ -643,7 +641,7 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Amount']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Amount']} />
                       <Legend />
                       <Bar dataKey="income" fill="hsl(var(--chart-2))" name="Income" />
                       <Bar dataKey="amount" fill="hsl(var(--chart-1))" name="Expenses" />
@@ -672,10 +670,10 @@ export default function VisualsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="category" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'Variance']} />
+                      <Tooltip formatter={(value) => [`$${typeof value === 'number' ? value.toFixed(2) : value}`, 'Variance']} />
                       <Bar 
                         dataKey="variance" 
-                        fill={(entry) => entry.variance > 0 ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))'}
+                        fill="hsl(var(--chart-2))"
                         name="Variance"
                       />
                     </BarChart>
