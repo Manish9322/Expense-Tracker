@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const expenseApi = createApi({
   reducerPath: "expenseApi",
   baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
-  tagTypes: ["Expenses"],
+  tagTypes: ["Expenses", "DailyExpenseLogs"],
   endpoints: (builder) => ({
     // ============================ Expenses ============================== //
 
