@@ -80,3 +80,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Sidebar layout styles */
+:root {
+  --sidebar-width: 16rem;
+}
+
+@media (min-width: 768px) {
+  main {
+    margin-left: var(--sidebar-width);
+    transition: margin-left 300ms ease-in-out;
+  }
+}
+
+@media (max-width: 767px) {
+  main {
+    margin-left: 0 !important;
+  }
+}

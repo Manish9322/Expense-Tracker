@@ -4,14 +4,16 @@ import { useEffect, useState } from 'react';
 import { formatCurrency } from '@/lib/data';
 import { Expense } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 interface ExpensesTotalProps {
   expenses: Expense[];
   currency?: string;
+  isLoading?: boolean;
 }
 
-export function ExpensesTotal({ expenses, currency = 'USD' }: ExpensesTotalProps) {
+export function ExpensesTotal({ expenses, currency = 'USD', isLoading = false }: ExpensesTotalProps) {
   const [total, setTotal] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -40,14 +42,22 @@ export function ExpensesTotal({ expenses, currency = 'USD' }: ExpensesTotalProps
       <CardContent>
         <div className="flex items-center justify-between">
           <div className="text-3xl font-bold tracking-tight transition-all duration-300">
-            <span className={cn(
-              isAnimating && 'animate-pulse text-primary'
-            )}>
-              {formatCurrency(total, currency)}
-            </span>
+            {isLoading ? (
+              <Skeleton className="h-9 w-32" />
+            ) : (
+              <span className={cn(
+                isAnimating && 'animate-pulse text-primary'
+              )}>
+                {formatCurrency(total, currency)}
+              </span>
+            )}
           </div>
           <div className="text-sm text-muted-foreground">
-            {expenses.filter(e => e.isChecked).length} items
+            {isLoading ? (
+              <Skeleton className="h-4 w-16" />
+            ) : (
+              `${expenses.filter(e => e.isChecked).length} items`
+            )}
           </div>
         </div>
       </CardContent>
