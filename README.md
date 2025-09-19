@@ -5,7 +5,7 @@ It provides an intuitive interface for recording transactions and a comprehensiv
 
 The project is built using **Next.js (App Router)**, **Tailwind CSS**, **Redux**, and **MongoDB**, ensuring a dynamic, scalable, and maintainable application with real-time expense tracking and automated daily workflows.
 
-![Expense Tracker](./public/images/ExpenseTracker.png)
+![Expense Tracker](./public/Expense-Tracker.png)
 
 ---
 
