@@ -58,27 +58,56 @@ class DailyLogCronService {
    */
   async createDailyLog() {
     try {
-      console.log('[Cron Service] Executing daily expense log creation...');
+      console.log('[Cron Service] Executing daily expense log creation and cleanup...');
       
       const baseUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/daily-log`, {
+      
+      // Step 1: Create daily log for today's expenses BEFORE cleanup
+      const today = new Date().toISOString().split("T")[0];
+      console.log(`[Cron Service] Creating log for today: ${today}`);
+      
+      const logResponse = await fetch(`${baseUrl}/api/daily-log`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ date: today })
       });
 
-      const result = await response.json();
+      const logResult = await logResponse.json();
 
-      if (response.ok) {
-        console.log('[Cron Service] Daily log created successfully:', result.message);
-        console.log('[Cron Service] Log details:', result.data);
+      if (logResponse.ok) {
+        console.log('[Cron Service] Daily log created successfully:', logResult.message);
+        console.log('[Cron Service] Log details:', logResult.data);
       } else {
-        console.error('[Cron Service] Failed to create daily log:', result.error);
+        console.error('[Cron Service] Failed to create daily log:', logResult.error);
+        // Continue with cleanup even if log creation failed
       }
 
+      // Step 2: Cleanup expenses after log creation
+      console.log('[Cron Service] Starting expense cleanup...');
+      
+      const cleanupResponse = await fetch(`${baseUrl}/api/cleanup-daily`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date: today })
+      });
+
+      const cleanupResult = await cleanupResponse.json();
+
+      if (cleanupResponse.ok) {
+        console.log('[Cron Service] Cleanup completed successfully:', cleanupResult.message);
+        console.log('[Cron Service] Cleanup details:', cleanupResult.data);
+      } else {
+        console.error('[Cron Service] Failed to cleanup expenses:', cleanupResult.error);
+      }
+
+      console.log('[Cron Service] Daily workflow completed');
+
     } catch (error) {
-      console.error('[Cron Service] Error during daily log creation:', error);
+      console.error('[Cron Service] Error during daily workflow:', error);
     }
   }
 

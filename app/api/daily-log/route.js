@@ -37,20 +37,31 @@ export async function POST(request) {
   try {
     await _db();
 
-    // Get today's date
-    const today = new Date().toISOString().split("T")[0];
-    
-    console.log(`[API] Creating daily log for ${today}`);
+    const body = await request.json();
+    const { date: requestDate } = body || {};
 
-    // Check if log already exists
-    const existingLog = await DailyExpenseLog.findOne({ date: today });
+    // Allow manual date override, default to yesterday for cron jobs
+    let targetDate;
+    if (requestDate) {
+      targetDate = requestDate;
+    } else {
+      // For cron jobs, create log for yesterday
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      targetDate = yesterday.toISOString().split("T")[0];
+    }
+    
+    console.log(`[API] Creating daily log for ${targetDate}`);
+
+    // Check if log already exists for this date
+    const existingLog = await DailyExpenseLog.findOne({ date: targetDate });
     if (existingLog) {
-      console.log(`[API] Log already exists for ${today}`);
+      console.log(`[API] Log already exists for ${targetDate}`);
       return NextResponse.json({
         success: true,
-        message: `Daily log already exists for ${today}`,
+        message: `Daily log already exists for ${targetDate}`,
         data: {
-          date: today,
+          date: targetDate,
           logId: existingLog._id,
           totalAmount: existingLog.totalAmount,
           expenseCount: existingLog.expenses.length
@@ -58,26 +69,48 @@ export async function POST(request) {
       }, { status: 200 });
     }
 
-    // Get all expenses
-    const expenses = await Expense.find({}).sort({ createdAt: -1 });
+    // Get expenses created on the target date
+    const startOfDay = new Date(targetDate + 'T00:00:00.000Z');
+    const endOfDay = new Date(targetDate + 'T23:59:59.999Z');
+    
+    const expenses = await Expense.find({
+      createdAt: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      }
+    }).sort({ createdAt: -1 });
+
+    // Only create log if there are expenses for that day
+    if (expenses.length === 0) {
+      console.log(`[API] No expenses found for ${targetDate}, skipping log creation`);
+      return NextResponse.json({
+        success: true,
+        message: `No expenses found for ${targetDate}`,
+        data: {
+          date: targetDate,
+          expenseCount: 0
+        }
+      }, { status: 200 });
+    }
+
     const checkedExpenses = expenses.filter(expense => expense.isChecked);
     const totalAmount = checkedExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-    // Create daily log
+    // Create daily log for that specific date
     const dailyLog = await DailyExpenseLog.create({
-      date: today,
-      expenses: expenses, // Store all expenses
-      totalAmount: totalAmount // But only calculate total from checked ones
+      date: targetDate,
+      expenses: expenses, // Store expenses from that specific day
+      totalAmount: totalAmount // Calculate total from checked ones
     });
 
-    console.log(`[API] Successfully created daily log for ${today}`);
+    console.log(`[API] Successfully created daily log for ${targetDate}`);
 
     return NextResponse.json({
       success: true,
-      message: `Daily log created successfully for ${today}`,
+      message: `Daily log created successfully for ${targetDate}`,
       data: {
         id: dailyLog._id,
-        date: today,
+        date: targetDate,
         totalExpenses: expenses.length,
         checkedExpenses: checkedExpenses.length,
         totalAmount: totalAmount
@@ -90,7 +123,7 @@ export async function POST(request) {
     if (error.code === 11000) {
       return NextResponse.json({
         success: false,
-        error: "Daily log already exists for today",
+        error: "Daily log already exists for this date",
         message: "A log entry has already been created for this date"
       }, { status: 409 });
     }
@@ -98,6 +131,109 @@ export async function POST(request) {
     return NextResponse.json({
       success: false,
       error: "Failed to create daily expense log",
+      message: error.message
+    }, { status: 500 });
+  }
+}
+
+/**
+ * PATCH - Backfill missing daily logs for all dates with expenses
+ */
+export async function PATCH(request) {
+  try {
+    await _db();
+
+    console.log('[API] Starting backfill process for missing daily logs...');
+
+    // Get all expenses and group them by date
+    const allExpenses = await Expense.find({}).sort({ createdAt: 1 });
+    
+    if (allExpenses.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: "No expenses found to create logs from",
+        data: { logsCreated: 0 }
+      }, { status: 200 });
+    }
+
+    // Group expenses by date
+    const expensesByDate = {};
+    allExpenses.forEach(expense => {
+      const expenseDate = expense.createdAt.toISOString().split('T')[0];
+      if (!expensesByDate[expenseDate]) {
+        expensesByDate[expenseDate] = [];
+      }
+      expensesByDate[expenseDate].push(expense);
+    });
+
+    const dates = Object.keys(expensesByDate).sort();
+    const logsCreated = [];
+    const logsSkipped = [];
+
+    // Create logs for each date that has expenses
+    for (const date of dates) {
+      try {
+        // Check if log already exists
+        const existingLog = await DailyExpenseLog.findOne({ date });
+        if (existingLog) {
+          logsSkipped.push({
+            date,
+            reason: 'Log already exists',
+            logId: existingLog._id
+          });
+          continue;
+        }
+
+        const dateExpenses = expensesByDate[date];
+        const checkedExpenses = dateExpenses.filter(expense => expense.isChecked);
+        const totalAmount = checkedExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+        // Create daily log for this date
+        const dailyLog = await DailyExpenseLog.create({
+          date,
+          expenses: dateExpenses,
+          totalAmount: totalAmount
+        });
+
+        logsCreated.push({
+          date,
+          logId: dailyLog._id,
+          totalExpenses: dateExpenses.length,
+          checkedExpenses: checkedExpenses.length,
+          totalAmount: totalAmount
+        });
+
+        console.log(`[API] Created daily log for ${date}: ${dateExpenses.length} expenses, total: $${totalAmount}`);
+
+      } catch (error) {
+        console.error(`[API] Error creating log for ${date}:`, error);
+        logsSkipped.push({
+          date,
+          reason: error.message
+        });
+      }
+    }
+
+    console.log(`[API] Backfill completed: ${logsCreated.length} logs created, ${logsSkipped.length} skipped`);
+
+    return NextResponse.json({
+      success: true,
+      message: `Backfill completed successfully`,
+      data: {
+        logsCreated: logsCreated.length,
+        logsSkipped: logsSkipped.length,
+        details: {
+          created: logsCreated,
+          skipped: logsSkipped
+        }
+      }
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("[API] Error during backfill process:", error);
+    return NextResponse.json({
+      success: false,
+      error: "Failed to backfill daily logs",
       message: error.message
     }, { status: 500 });
   }

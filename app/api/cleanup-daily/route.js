@@ -3,7 +3,7 @@ import _db from "../../services/db.js";
 import Expense from "../../models/Expense.model.js";
 
 /**
- * POST - Cleanup daily expenses (reset isChecked to false for auto-add items)
+ * POST - Cleanup daily expenses (delete non-auto-add, reset auto-add to unchecked)
  */
 export async function POST(request) {
   try {
@@ -14,19 +14,24 @@ export async function POST(request) {
 
     console.log(`[API] Cleaning up daily expenses for ${date || 'today'}`);
 
+    // Delete expenses that are NOT set to auto-add
+    const deleteResult = await Expense.deleteMany({ autoAdd: false });
+
     // Reset isChecked to false for all auto-add expenses
-    const result = await Expense.updateMany(
+    const resetResult = await Expense.updateMany(
       { autoAdd: true },
       { $set: { isChecked: false } }
     );
 
-    console.log(`[API] Reset ${result.modifiedCount} auto-add expenses`);
+    console.log(`[API] Deleted ${deleteResult.deletedCount} non-auto-add expenses`);
+    console.log(`[API] Reset ${resetResult.modifiedCount} auto-add expenses to unchecked`);
 
     return NextResponse.json({
       success: true,
-      message: `Successfully reset ${result.modifiedCount} auto-add expenses`,
+      message: `Cleanup completed: deleted ${deleteResult.deletedCount} non-auto-add expenses, reset ${resetResult.modifiedCount} auto-add expenses`,
       data: {
-        modifiedCount: result.modifiedCount,
+        deletedCount: deleteResult.deletedCount,
+        resetCount: resetResult.modifiedCount,
         date: date || new Date().toISOString().split("T")[0]
       }
     }, { status: 200 });

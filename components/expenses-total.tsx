@@ -46,7 +46,7 @@ export function ExpensesTotal({ expenses, currency = 'USD', isLoading = false }:
               <Skeleton className="h-9 w-32" />
             ) : (
               <span className={cn(
-                isAnimating && 'animate-pulse text-primary'
+                isAnimating && 'text-primary'
               )}>
                 {formatCurrency(total, currency)}
               </span>
