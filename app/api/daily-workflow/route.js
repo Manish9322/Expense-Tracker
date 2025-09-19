@@ -6,7 +6,19 @@ import { NextResponse } from "next/server";
  */
 export async function POST(request) {
   try {
-    const body = await request.json() || {};
+    let body = {};
+    
+    // Safely parse JSON, handle empty body
+    try {
+      const text = await request.text();
+      if (text && text.trim()) {
+        body = JSON.parse(text);
+      }
+    } catch (parseError) {
+      console.log('[Daily Workflow] No JSON body provided, using defaults');
+      body = {};
+    }
+    
     const { date } = body;
     
     // Use provided date or default to today

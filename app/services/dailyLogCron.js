@@ -62,16 +62,20 @@ class DailyLogCronService {
       
       const baseUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000';
       
-      // Step 1: Create daily log for today's expenses BEFORE cleanup
-      const today = new Date().toISOString().split("T")[0];
-      console.log(`[Cron Service] Creating log for today: ${today}`);
+      // Step 1: Create daily log for TODAY's expenses BEFORE cleanup
+      // When cron runs at midnight (00:00 Sept 20), we want to log Sept 19's expenses
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const targetDate = yesterday.toISOString().split("T")[0];
+      
+      console.log(`[Cron Service] Creating log for yesterday: ${targetDate}`);
       
       const logResponse = await fetch(`${baseUrl}/api/daily-log`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ date: today })
+        body: JSON.stringify({ date: targetDate })
       });
 
       const logResult = await logResponse.json();
@@ -92,7 +96,7 @@ class DailyLogCronService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ date: today })
+        body: JSON.stringify({ date: targetDate })
       });
 
       const cleanupResult = await cleanupResponse.json();
