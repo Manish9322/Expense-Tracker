@@ -37,21 +37,30 @@ export async function POST(request) {
   try {
     await _db();
 
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { date: requestDate } = body || {};
+
+    // Check if this is a cron job execution (no body or user-agent indicates cron)
+    const isCronJob = !requestDate && (
+      request.headers.get('user-agent')?.includes('vercel-cron') ||
+      !request.headers.get('user-agent')
+    );
 
     // Allow manual date override, default to yesterday for cron jobs
     let targetDate;
     if (requestDate) {
       targetDate = requestDate;
-    } else {
+    } else if (isCronJob) {
       // For cron jobs, create log for yesterday
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       targetDate = yesterday.toISOString().split("T")[0];
+    } else {
+      // For manual calls without date, use today
+      targetDate = new Date().toISOString().split("T")[0];
     }
     
-    console.log(`[API] Creating daily log for ${targetDate}`);
+    console.log(`[API] Creating daily log for ${targetDate} (isCronJob: ${isCronJob})`);
 
     // Check if log already exists for this date
     const existingLog = await DailyExpenseLog.findOne({ date: targetDate });
@@ -105,6 +114,25 @@ export async function POST(request) {
 
     console.log(`[API] Successfully created daily log for ${targetDate}`);
 
+    // If this is a cron job, also trigger cleanup
+    if (isCronJob) {
+      try {
+        const cleanupResponse = await fetch(`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/cleanup-daily`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ date: targetDate })
+        });
+        
+        const cleanupResult = await cleanupResponse.json();
+        console.log(`[API] Cleanup result for cron job:`, cleanupResult.message);
+      } catch (cleanupError) {
+        console.error(`[API] Cleanup failed during cron job:`, cleanupError);
+        // Don't fail the main operation if cleanup fails
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: `Daily log created successfully for ${targetDate}`,
@@ -113,7 +141,8 @@ export async function POST(request) {
         date: targetDate,
         totalExpenses: expenses.length,
         checkedExpenses: checkedExpenses.length,
-        totalAmount: totalAmount
+        totalAmount: totalAmount,
+        isCronJob: isCronJob
       }
     }, { status: 201 });
 

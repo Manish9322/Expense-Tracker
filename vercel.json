@@ -4,5 +4,8 @@
       "path": "/api/daily-log",
       "schedule": "0 0 * * *"
     }
-  ]
+  ],
+  "env": {
+    "TZ": "Asia/Kolkata"
+  }
 }
