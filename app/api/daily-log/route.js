@@ -89,30 +89,20 @@ export async function POST(request) {
       }
     }).sort({ createdAt: -1 });
 
-    // Only create log if there are expenses for that day
-    if (expenses.length === 0) {
-      console.log(`[API] No expenses found for ${targetDate}, skipping log creation`);
-      return NextResponse.json({
-        success: true,
-        message: `No expenses found for ${targetDate}`,
-        data: {
-          date: targetDate,
-          expenseCount: 0
-        }
-      }, { status: 200 });
-    }
-
+    // Always create log regardless of whether there are expenses or not
     const checkedExpenses = expenses.filter(expense => expense.isChecked);
     const totalAmount = checkedExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+    console.log(`[API] Found ${expenses.length} expenses for ${targetDate} (${checkedExpenses.length} checked, total: $${totalAmount})`);
 
     // Create daily log for that specific date
     const dailyLog = await DailyExpenseLog.create({
       date: targetDate,
-      expenses: expenses, // Store expenses from that specific day
+      expenses: expenses, // Store all expenses from that specific day (can be empty array)
       totalAmount: totalAmount // Calculate total from checked ones
     });
 
-    console.log(`[API] Successfully created daily log for ${targetDate}`);
+    console.log(`[API] Successfully created daily log for ${targetDate} with ${expenses.length} expenses`);
 
     // If this is a cron job, also trigger cleanup
     if (isCronJob) {
