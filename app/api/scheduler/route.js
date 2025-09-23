@@ -43,7 +43,10 @@ export async function POST(request) {
             message: "Daily log job started"
           });
         }
-        break;
+        return NextResponse.json({
+          success: false,
+          error: "Invalid job name for start action"
+        }, { status: 400 });
 
       case 'stop':
         if (job) {

@@ -2,10 +2,12 @@
   "crons": [
     {
       "path": "/api/daily-log",
-      "schedule": "0 0 * * *"
+      "schedule": "30 18 * * *"
     }
   ],
-  "env": {
-    "Time_Zone": "Asia/Kolkata"
+  "functions": {
+    "app/api/*/route.js": {
+      "maxDuration": 30
+    }
   }
 }

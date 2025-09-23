@@ -9,16 +9,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { DailyWorkflowManager } from '@/components/daily-workflow-manager';
 import { Provider } from 'react-redux';
 import store from '../app/services/store';
-import { useEffect } from 'react';
-
-// Initialize scheduler on app startup
-if (typeof window === 'undefined') {
-  // Server-side only
-  import('../app/services/scheduler.js').then((schedulerModule) => {
-    const scheduler = schedulerModule.default;
-    scheduler.startDailyLogJob();
-  });
-}
 
 export default function RootLayout({
   children,
