@@ -6,6 +6,6 @@
     }
   ],
   "env": {
-    "TZ": "Asia/Kolkata"
+    "Time_Zone": "Asia/Kolkata"
   }
 }

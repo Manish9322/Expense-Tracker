@@ -1,0 +1,25 @@
+name: Daily Expense Log Trigger
+
+on:
+  schedule:
+    # Runs daily at midnight IST (18:30 UTC = 00:00 IST)
+    - cron: '30 18 * * *'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  trigger-daily-log:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger Daily Expense Log
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: github-actions-cron" \
+            -d '{}' \
+            ${{ secrets.APP_URL }}/api/daily-log
+        
+      - name: Log completion
+        run: echo "Daily expense log triggered successfully"
