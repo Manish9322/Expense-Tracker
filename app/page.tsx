@@ -131,7 +131,7 @@ export default function Dashboard() {
 
         {isLoaded && expenses.length === 0 && !isExpensesLoading && (
           <div className="col-span-full flex flex-col items-center justify-center p-8 text-center">
-            <h3 className="text-lg font-medium">No expenses yet</h3>
+            <h3 className="text-lg font-medium">No expenses yet here</h3>
             <p className="text-muted-foreground">Add your first expense to get started</p>
           </div>
         )}
