@@ -1,11 +1,12 @@
 name: Daily Expense Log Trigger
 
 on:
-  schedule:
-    # Runs daily at midnight IST (18:30 UTC = 00:00 IST)
-    - cron: '30 18 * * *'
+  # Disabled in favor of Vercel crons for better reliability
+  # schedule:
+  #   # Runs daily at midnight IST (18:30 UTC = 00:00 IST)
+  #   - cron: '30 18 * * *'
   
-  # Allow manual triggering
+  # Allow manual triggering only
   workflow_dispatch:
 
 jobs:

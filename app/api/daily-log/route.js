@@ -40,10 +40,14 @@ export async function POST(request) {
     const body = await request.json().catch(() => ({}));
     const { date: requestDate } = body || {};
 
-    // Check if this is a cron job execution (no body or user-agent indicates cron)
+    // Check if this is a cron job execution (no body or specific user-agents indicate cron)
+    const userAgent = request.headers.get('user-agent') || '';
     const isCronJob = !requestDate && (
-      request.headers.get('user-agent')?.includes('vercel-cron') ||
-      !request.headers.get('user-agent')
+      userAgent.includes('vercel-cron') ||
+      userAgent.includes('github-actions-cron') ||
+      userAgent.includes('Vercel-Cron') ||
+      !userAgent || // No user agent
+      userAgent === 'undici' // Vercel internal requests
     );
 
     // Allow manual date override, default to yesterday for cron jobs
@@ -51,8 +55,12 @@ export async function POST(request) {
     if (requestDate) {
       targetDate = requestDate;
     } else if (isCronJob) {
-      // For cron jobs, create log for yesterday
-      const yesterday = new Date();
+      // For cron jobs, create log for yesterday (since cron runs at midnight)
+      // Use IST timezone to determine the correct "yesterday"
+      const now = new Date();
+      const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+      const istNow = new Date(now.getTime() + istOffset);
+      const yesterday = new Date(istNow);
       yesterday.setDate(yesterday.getDate() - 1);
       targetDate = yesterday.toISOString().split("T")[0];
     } else {
@@ -61,6 +69,7 @@ export async function POST(request) {
     }
     
     console.log(`[API] Creating daily log for ${targetDate} (isCronJob: ${isCronJob})`);
+    console.log(`[API] Request info - User-Agent: ${userAgent}, Has body: ${!!requestDate}, Current UTC: ${new Date().toISOString()}`);
 
     // Check if log already exists for this date
     const existingLog = await DailyExpenseLog.findOne({ date: targetDate });

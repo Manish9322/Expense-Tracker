@@ -7,7 +7,7 @@
   ],
   "functions": {
     "app/api/*/route.js": {
-      "maxDuration": 30
+      "maxDuration": 60
     }
   }
 }
